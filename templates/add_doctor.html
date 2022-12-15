@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<div class="jumbotron text-center">
+    <form action="{{ url_for('personadd')}}" method="post">
+        <h5>Enter the user Details</h5>
+        <div>
+          <input type="text" name="doctor_id" placeholder="doctor ID" required>
+      </div>
+      <div>
+          <input type="text" name="clinic_number" placeholder="Clinic Number", required>
+      </div>
+      <div>
+          <input type="text" name="hnumber" placeholder="Hospital Number",required>
+      </div>
+        <div>
+            <input type="text" name="fname" placeholder="First Name",required>
+        </div>
+        <div>
+          <input type="text" name="lname" placeholder="Last Name",required>
+      </div>
+        <div>
+            <input type="text" name="phone_number" placeholder="Phone Number",required>
+        </div>
+        <div>
+            <button >Submit</button>
+        </div>
+    </form>
+</div>
+{% endblock body %}
+

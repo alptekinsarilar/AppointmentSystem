@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<div class="jumbotron text-center">
+    <h3>Hastane Randevu Sistemine Hoşgeldiniz</h3>
+    <p>Bu sistemi kullanarak doktorunuzdan istediğiniz gibi randevunuzu alabilirsiniz.</p>
+</div>
+
+<div>
+    <select name= hname method="GET" action="/" >
+        {% for hname in hnames %}
+        <option value= "{{hname}}" SELECTED>{{hname}}</option>"
+        {% endfor %}
+    </select>
+
+</div>
+{% endblock body %}
