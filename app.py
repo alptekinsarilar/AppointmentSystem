@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from flask_wtf import FlaskForm, CSRFProtect
+from wtforms.fields import SubmitField
+from wtforms_sqlalchemy.fields import QuerySelectField
 
 
 app = Flask(__name__)
@@ -9,6 +12,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = 'secret string'
 
 db = SQLAlchemy(app)
+csrf = CSRFProtect(app)
 
 
 class Appointment(db.Model):
@@ -63,28 +67,35 @@ class Doctor(db.Model):
         self.phone_number = phone_number
 
 
+def the_hospital_factory():
+    return Hospital.query
+
+class selectHospitalForm(FlaskForm):
+    all_hospitals =  QuerySelectField(query_factory=the_hospital_factory, get_label='hname', render_kw={"onclick": "clinicFunction();"})
+    submit = SubmitField()
 
 
 @app.route('/', methods = ['POST','GET'])
 def index():
-    hnumber = ''
-    clinic_num = ''
-    doc_num= ''
+    return render_template('show.html', form=selectHospitalForm())
+    # hnumber = ''
+    # clinic_num = ''
+    # doc_num= ''
 
-    if request.method == "POST": 
-        print("HI")
+    # if request.method == "POST": 
+    #     print("HI")
 
-    try:
-        Hospitals = Hospital.query.order_by(Hospital.hname).all()
-        hnames = []
-        for h in Hospitals:
-            hnames.append(h.hname)
-        return render_template('index.html',hnames = hnames)
-    except Exception as e:
-        # e holds description of the error
-        error_text = "<p>The error:<br>" + str(e) + "</p>"
-        hed = '<h1>Something is broken.</h1>'
-        return hed + error_text
+    # try:
+    #     Hospitals = Hospital.query.order_by(Hospital.hname).all()
+    #     hnames = []
+    #     for h in Hospitals:
+    #         hnames.append(h.hname)
+    #     return render_template('index.html',hnames = hnames)
+    # except Exception as e:
+    #     # e holds description of the error
+    #     error_text = "<p>The error:<br>" + str(e) + "</p>"
+    #     hed = '<h1>Something is broken.</h1>'
+    #     return hed + error_text
 
 
 
