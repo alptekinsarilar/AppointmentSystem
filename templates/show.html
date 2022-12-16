@@ -1,10 +1,38 @@
 {% from "__helpers.html" import render_field with context %}
 {% extends 'layout.html' %}
+
 {% block body %}
 <div id="foo">
+    
     <form method="post">
-        {{ form.csrf_token() }}
+
+
+        
+        
+        <!-- {{ form.csrf_token() }} -->
         {{ render_field(form.all_hospitals) }}
     </form>
 </div>
 {% endblock %}
+
+{% block script%}
+<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+
+<script>
+    function clinicFunction() {
+
+        var my = $('#all_hospitals option:selected').val()
+        var data1 = {'selected_hospital': my}
+        $.ajax({
+            url: 'get-clinics',
+            data: JSON.stringify(data1),
+            method: 'POST',
+            contentType: 'application/json',
+            success: function(data) {
+                $('#foo').replaceWith(data);
+            }
+        });
+    };
+</script>
+
+{%endblock%}

@@ -1,0 +1,24 @@
+{% extends 'layout.html' %}
+{% block body %}
+
+    <textarea id="firstbox">Edit Me</textarea>
+    <button onclick="performPost()">Perform POST!</button>
+
+
+{% endblock %}
+
+
+
+{% block script %}
+<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+<script>
+    function performPost() {
+
+        $.ajax({
+            type: "POST",
+            url: "{{ url_for('create_file') }}",
+            data: {"name" : "Jim"},
+        })
+    }
+</script>
+{% endblock %}

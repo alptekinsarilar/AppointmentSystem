@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_wtf import FlaskForm, CSRFProtect
@@ -12,7 +12,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = 'secret string'
 
 db = SQLAlchemy(app)
-csrf = CSRFProtect(app)
+# csrf = CSRFProtect(app)
 
 
 class Appointment(db.Model):
@@ -70,8 +70,16 @@ class Doctor(db.Model):
 def the_hospital_factory():
     return Hospital.query
 
+def the_clinic_factory():
+     return [Clinic.query.get(item) for item in session['clinics']]
+
+
 class selectHospitalForm(FlaskForm):
     all_hospitals =  QuerySelectField(query_factory=the_hospital_factory, get_label='hname', render_kw={"onclick": "clinicFunction();"})
+    submit = SubmitField()
+
+class SelectClinicForm(FlaskForm):
+    clinics = QuerySelectField(query_factory=the_clinic_factory, get_label='clinic_name')
     submit = SubmitField()
 
 
@@ -101,6 +109,16 @@ def index():
 
 
 
+@app.route('/get-clinics', methods=['GET', 'POST'])
+def get_clinics():
+    print("HI!")
+    selected_hospital = request.get_json(silent=False)
+    print(selected_hospital)
+    selected_clinics = Clinic.query.all()
+    session['clinics'] = [item.clinic_number for item in selected_clinics]
+    return render_template('selected_clinics.html', form=SelectClinicForm())
+
+
 @app.route("/doctors")
 def doctors():
     try:
@@ -122,6 +140,17 @@ def doctors():
 @app.route("/addperson")
 def addperson():
     return render_template("add_doctor.html")   
+
+@app.route("/deneme")
+def deneme():
+    return render_template("deneme.html")   
+
+@app.route('/create_file', methods=['POST'])
+def create_file():
+    if request.method == 'POST':
+        print("Request handled")
+        return render_template('add_doctor.html')
+
 
 @app.route("/personadd", methods=['POST'])
 def personadd():
