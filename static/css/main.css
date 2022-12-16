@@ -2,3 +2,11 @@ body{
     margin:0;
     font-family: sans-serif;
 }
+
+.foo {
+    position: static;
+    left:0%;
+    border: 5px solid;
+    display: flex;
+    justify-content: center;
+  }

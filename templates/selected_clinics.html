@@ -1,9 +1,11 @@
 {% from "__helpers.html" import render_field with context %}
-{% block body%}
+{% extends 'show.html' %}
+{% block content%}
 <div id="bar">
     <form method="post">
         {{ form.csrf_token() }}
         {{ render_field(form.clinics) }}
     </form>
+    <button > Next</button>
 </div>
 {% endblock %}

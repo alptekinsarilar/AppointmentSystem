@@ -2,17 +2,23 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div id="foo">
+{% block content %}
+<div id="foo" style="width:800px; margin:0 auto;">
     
-    <form method="post">
+    <form name = 'hospital_form'  method="post" > 
+        {{ hospital_form.csrf_token() }}
+        {{ render_field(hospital_form.all_hospitals) }}
+    </form> 
+    <button onclick = "clinicFunction();">Next</button>
 
-
-        
-        
-        <!-- {{ form.csrf_token() }} -->
-        {{ render_field(form.all_hospitals) }}
+    <form name = 'clinic_form'  method="post"> 
+        {{ clinic_form.csrf_token() }}
+        {{ render_field(clinic_form.clinics) }}
     </form>
+    
+    
 </div>
+{% endblock %}
 {% endblock %}
 
 {% block script%}
@@ -20,6 +26,15 @@
 
 <script>
     function clinicFunction() {
+        var csrf_token = "{{ csrf_token() }}";
+
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrf_token);
+                }
+            }
+        });
 
         var my = $('#all_hospitals option:selected').val()
         var data1 = {'selected_hospital': my}

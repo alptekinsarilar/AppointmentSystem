@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, jsonify, request, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_wtf import FlaskForm, CSRFProtect
@@ -12,7 +12,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = 'secret string'
 
 db = SQLAlchemy(app)
-# csrf = CSRFProtect(app)
+csrf = CSRFProtect(app)
 
 
 class Appointment(db.Model):
@@ -75,7 +75,7 @@ def the_clinic_factory():
 
 
 class selectHospitalForm(FlaskForm):
-    all_hospitals =  QuerySelectField(query_factory=the_hospital_factory, get_label='hname', render_kw={"onclick": "clinicFunction();"})
+    all_hospitals =  QuerySelectField(query_factory=the_hospital_factory, get_label='hname')# render_kw={"onclick": "clinicFunction();"}
     submit = SubmitField()
 
 class SelectClinicForm(FlaskForm):
@@ -85,7 +85,7 @@ class SelectClinicForm(FlaskForm):
 
 @app.route('/', methods = ['POST','GET'])
 def index():
-    return render_template('show.html', form=selectHospitalForm())
+    return render_template('show.html', hospital_form=selectHospitalForm())
     # hnumber = ''
     # clinic_num = ''
     # doc_num= ''
@@ -106,17 +106,52 @@ def index():
     #     return hed + error_text
 
 
+@app.route('/appointment',methods=['POST','GET'])
+def appointment():
+    hospital_form = selectHospitalForm()
+    clinic_form = SelectClinicForm()
 
 
+
+    return render_template('appointment.html',hospital_form =hospital_form, clinic_form = clinic_form)
+
+@app.route("/appointment/<hospital>")
+def get_hospital(hospital):
+    joined_table = db.session.query(Clinic, Hospital, HospitalClinic
+        ).filter(Hospital.hnumber==hospital
+        ).join(HospitalClinic,HospitalClinic.hnumber==Hospital.hnumber 
+        ).join(Clinic, Clinic.clinic_number==HospitalClinic.clinic_number
+        ).all()    
+    print(joined_table)
+    clinic_array = []
+
+    for all in joined_table:
+        clinic = all[0]
+        cliObj = {}
+        cliObj["clinic_number"]  = clinic.clinic_number
+        cliObj["clinic_name"]  = clinic.clinic_name
+        clinic_array.append(cliObj)
+
+    return jsonify({'clinics':clinic_array})   
+
+  
+
+@app.route('/hospital',methods=['POST','GET'])
+def hospital():
+    hospital = selectHospitalForm()
+    clinic_form = SelectClinicForm()
+
+
+    return render_template('show.html', hospital_form=hospital ,clinic_form = clinic_form)
 
 @app.route('/get-clinics', methods=['GET', 'POST'])
 def get_clinics():
     print("HI!")
-    selected_hospital = request.get_json(silent=False)
-    print(selected_hospital)
+    selected_hospital= request.get_json(silent=False)
     selected_clinics = Clinic.query.all()
     session['clinics'] = [item.clinic_number for item in selected_clinics]
-    return render_template('selected_clinics.html', form=SelectClinicForm())
+    session['selected_hospital'] = selected_hospital
+    return render_template('show.html', hospital_form = selectHospitalForm() , clinic_form =SelectClinicForm() )
 
 
 @app.route("/doctors")
@@ -169,4 +204,6 @@ def personadd():
 
 if(__name__== "__main__"):
     # db.create_all()
+    csrf.init_app(app)
     app.run(debug=True)    
+    

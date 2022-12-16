@@ -7,10 +7,33 @@
     <title>Document</title>
 </head>
 <body>
-    <form action="{{ url_for('personadd')}}" method="post">
+
+    <form name = 'appointment_form'  method="post" >
+        {{ hospital_form.csrf_token() }} 
+        {{ hospital_form.all_hospitals }} <br>
+        {{ clinic_form.clinics }}
+    </form>    
     
-    
-    
-    </form>
 </body>
+
+<script>
+    let hospital_select = document.getElementById('all_hospitals') 
+    let clinic_select = document.getElementById('clinics')
+    
+    hospital_select.onchange = function(){
+        hospital = hospital_select.value;
+
+        fetch('/appointment/'+hospital).then(function(response){
+            response.json().then(function(data){
+                let optionHTML = '';
+                for(let clinic of data.clinics){
+                    optionHTML +='<option value="'+ clinic.clinic_number + '">' + clinic.clinic_name+ '</option>';
+                }
+                clinic_select.innerHTML = optionHTML;
+            });
+
+        });
+    }
+</script>
+
 </html>
