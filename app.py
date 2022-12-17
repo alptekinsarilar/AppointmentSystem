@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, session
+from flask import Flask, render_template, jsonify, flash, request, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import column_property
 from datetime import datetime, timedelta
@@ -20,14 +20,16 @@ class Appointment(db.Model):
     _tablename_ = 'appointment'
     doc_id = db.Column(db.String(9), primary_key=True)
     pat_ssn = db.Column(db.String(9), primary_key=True)
-    app_date = db.Column(db.Date, nullable=False)
-    app_time = db.Column(db.Time, nullable=False)
+    app_date = db.Column(db.Date, primary_key=True)
+    app_time = db.Column(db.Time, primary_key=True)
     app_desc = db.Column(db.String(240))
 
-    def __init__(self,doc_id,pat_ssn,app_time):
+    def __init__(self,doc_id,pat_ssn,app_time,app_date,app_desc):
         self.doc_id = doc_id
         self.pat_ssn = pat_ssn
+        self.app_date = app_date
         self.app_time = app_time
+        self.app_desc =  app_desc
 
 
 class Doctor(db.Model):
@@ -166,10 +168,12 @@ def get_doctors(hospital,clinic):
 
     return jsonify({'doctors':doctor_array})      
 
-@app.route("/range/<doctor>",methods=["POST","GET"])
-def range(doctor): 
+@app.route("/range/<doctor>/<ssn>/<desc>",methods=["POST","GET"])
+def range(doctor,ssn,desc): 
     if request.method == 'POST':
         From = request.form['From']
+        print(ssn)
+        print(desc)
         dt = datetime.strptime(From, "%Y-%m-%d").date()
 
         booked_app = Appointment.query.filter_by(app_date = dt).all()
@@ -179,18 +183,45 @@ def range(doctor):
         app_time_list = app_create(doctor)
         app_list = []
         for i in app_time_list:
-            new_app = Appointment (doctor, "11111118",i)
+            time = datetime.strptime(i, '%H:%M').time()
+            new_app = Appointment (doctor, ssn,time,From,desc)
             app_list.append(new_app)
 
+        to_be_deleted = []
         for i in app_list:
             for j in booked_app:
-                if i.app_time == j.app_time.strftime("%H:%M"):
-                    app_list.remove(i)    
+                print(f'{i.app_time}, {j.app_time}')
+                if i.app_time == j.app_time:
+                    to_be_deleted.append(i)    
                     print("deleted!")    
+        for i in to_be_deleted:
+            app_list.remove(i)            
             
 
     
     return jsonify({'htmlresponse': render_template('available_time_response.html', ordersrange=app_list)})  
+
+@app.route("/sub_appointment/<doctor>/<ssn>/<date>/<time>/<desc>",methods=["POST","GET"])
+def submit_appointment(doctor,ssn,date,time,desc): 
+    time =  datetime.strptime(time, '%H:%M:%S').time()
+    date = datetime.strptime(date, "%Y-%m-%d").date()
+    print(doctor)
+    print(ssn)
+    print(time)
+    
+    print(date)
+    print(desc)
+
+    new_app = Appointment (doctor,ssn,time,date,desc)
+    try:
+        db.session.add(new_app)
+        db.session.commit()
+        return jsonify({'result':'success'})   
+    except:
+        return jsonify({'result':'fail'})       
+
+   
+
 
 @app.route('/hospital',methods=['POST','GET'])
 def hospital():

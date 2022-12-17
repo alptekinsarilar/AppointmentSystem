@@ -10,3 +10,24 @@ body{
     display: flex;
     justify-content: center;
   }
+
+#thank-you-message {
+    display: none;
+}
+  
+#thank-you-message.show {
+    display: block;
+}
+
+#error-message {
+    display: none;
+}
+  
+#thank-you-message.show {
+    display: block;
+}  
+
+input:valid,
+textarea:valid {
+    background-color: palegreen;
+}  

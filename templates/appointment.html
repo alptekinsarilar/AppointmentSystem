@@ -6,21 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css"/>
+    <link rel="stylesheet" href="../static/css/main.css">
 </head>
 <body>
 
-    <form name = 'appointment_form'  method="post" >
+    <form name = 'appointment_form'  method="post">
         {{ hospital_form.csrf_token() }} 
         {{ hospital_form.all_hospitals }} <br>
         {{ clinic_form.clinics }}         <br>
         {{ doctor_form.doctors }}
     </form>    
 
+    
 
     <div class="row">
+        <div>
+            <input type="text" name="ssn" id="ssn" maxlength="9" minlength="9" class="form-control" placeholder="ssn" required/>
+        </div>
+        <div>
+            <input type="text" name="desc" id="desc" minlength="1" class="form-control" placeholder="desc" required/>
+        </div>
         <div class="col-md-2">
-            <input type="text" name="From" id="From" class="form-control" placeholder="Date"/>
+            <input type="text" name="From" id="From" class="form-control" placeholder="Date" required/>
         </div>
         <div class="col-md-8">
             <input type="button" name="range" id="range" value="Range" class="btn btn-success"/>
@@ -29,24 +37,13 @@
         <br/>
         </div>
         <div id="available_appointments">
-        <table class="table table-bordered">
-            <tr>
-            <th width="24%">Hospital</th>
-            <th width="19%">Clinic</th>
-            <th width="19%">Doctor</th>
-            <th width="19%">Available Date</th>
-            <th width="19%">Available Time</th>
-            </tr>
-            {% for row in orders %}
-            <tr>
-                <td>{{row.id}}</td>
-                <td>{{row.customer_name}}</td>
-                <td>{{row.purchased_items}}</td>
-                <td>{{row.purchased_date}}</td>
-                <td>$ {{row.price}}</td>
-            </tr>
-            {% endfor %}
-        </table>
+            <table class="table table-bordered">
+                <tr>
+                <th width="5%">Appointment Date</th>
+                <th width="35%">Appointment Time</th>
+
+            </table>
+            
         
         </div>
     
@@ -69,19 +66,19 @@
     });
     $(function(){
         $("#From").datepicker();
-        $("#to").datepicker();
     });
     $('#range').click(function(){
         var From = $('#From').val();
-        var to = $('#to').val();
         var doctor = document.getElementById('doctors').value
-        if(From != '' && to != ''&& doctor !='')
+        var ssn = document.getElementById('ssn').value
+        var desc = document.getElementById('desc').value
+        if(From != '' && doctor !='' && ssn !='' && desc !='')
         {
-            let url = '/range/'+doctor
+            let url = '/range/'+doctor+'/'+ssn+'/'+desc
             $.ajax({
                 url:url,
                 method:"POST",
-                data:{From:From, to:to},
+                data:{From:From},
                 success:function(data)
                 {
                     $('#available_appointments').html(data);
@@ -91,7 +88,7 @@
         }
         else
         {
-            alert("Please Select the Date and the Doctor");
+            alert("Please be sure all the fields are filled");
         }
     });
 });

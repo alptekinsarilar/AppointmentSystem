@@ -1,7 +1,17 @@
+<link rel="stylesheet" href="../static/css/main.css">
+
+<p id="thank-you-message">
+    Thank you for contacting us. We will be in touch with you very soon.
+  </p>
+<p id="error-message">
+    You already booked and appointment in this session
+</p>
+
 <table class="table table-bordered">
     <tr>
-    <th width="5%">Appointment Date</th>
-    <th width="35%">Appointment Time</th>
+
+    <th width="50%">Appointment Date</th>
+    <th width="50%">Appointment Time</th>
     </tr>
     {% for row in ordersrange %}
         <tr>
@@ -14,11 +24,33 @@
 <input type="hidden" name="deletefile" value="" id="deletefileID">
 
 <script>
+    var doctor = document.getElementById('doctors').value
+    var ssn = document.getElementById('ssn').value
+    var desc = document.getElementById('desc').value
+    var date = document.getElementById('From').value
     $(".row-button").click(function() {
-    var $item = $(this).closest("tr")   // Finds the closest row <tr> 
-                       .find(".app_time")     // Gets a descendent with class="nr"
-                       .text();         // Retrieves the text within <td>
+        if(doctor != '' && ssn != '' && desc != '' && desc != ''  && date != ''){
+        var $item = $(this).closest("tr")   // Finds the closest row <tr> 
+                            .find(".app_time")     // Gets a descendent with class="nr"
+                            .text();         // Retrieves the text within <td>
+            // alert($item)      // Outputs the answer
 
-    alert($item)      // Outputs the answer
-});
+            fetch('/sub_appointment/'+doctor+'/'+ssn+'/'+date+'/'+$item+'/'+desc).then(function(response){
+                response.json().then(function(data){
+                    result = data.result;
+                    if(result == 'success'){
+                        const thankYouMessage = document.getElementById('thank-you-message');
+                        thankYouMessage.classList.add('show');
+                    }
+                    else{
+                        const errorMsg = document.getElementById('error-message');
+                        errorMsg.classList.add('show');
+                    }
+                });
+            });;
+        } 
+        else{    
+            alert("Please be sure all the fields are filled")
+        }
+    });
 </script>
