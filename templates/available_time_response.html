@@ -1,0 +1,24 @@
+<table class="table table-bordered">
+    <tr>
+    <th width="5%">Appointment Date</th>
+    <th width="35%">Appointment Time</th>
+    </tr>
+    {% for row in ordersrange %}
+        <tr>
+        <td>{{row.app_date}}</td>
+        <td class="app_time">{{row.app_time}}</td>
+        <td><input class = "row-button" type="button" id = "row_select", value = "Take"></td>
+        </tr>
+    {% endfor %}
+</table>
+<input type="hidden" name="deletefile" value="" id="deletefileID">
+
+<script>
+    $(".row-button").click(function() {
+    var $item = $(this).closest("tr")   // Finds the closest row <tr> 
+                       .find(".app_time")     // Gets a descendent with class="nr"
+                       .text();         // Retrieves the text within <td>
+
+    alert($item)      // Outputs the answer
+});
+</script>

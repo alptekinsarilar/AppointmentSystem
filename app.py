@@ -1,9 +1,9 @@
 from flask import Flask, render_template, jsonify, request, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import column_property
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask_wtf import FlaskForm, CSRFProtect
-from wtforms.fields import SubmitField
+from wtforms.fields import SubmitField, DateField
 from wtforms_sqlalchemy.fields import QuerySelectField
 
 
@@ -13,7 +13,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = 'secret string'
 
 db = SQLAlchemy(app)
-csrf = CSRFProtect(app)
+# csrf = CSRFProtect(app)
 
 
 class Appointment(db.Model):
@@ -23,6 +23,32 @@ class Appointment(db.Model):
     app_date = db.Column(db.Date, nullable=False)
     app_time = db.Column(db.Time, nullable=False)
     app_desc = db.Column(db.String(240))
+
+    def __init__(self,doc_id,pat_ssn,app_time):
+        self.doc_id = doc_id
+        self.pat_ssn = pat_ssn
+        self.app_time = app_time
+
+
+class Doctor(db.Model):
+    _tablename_ ='doctor'
+    doctor_id = db.Column(db.String(9), primary_key = True)
+    clinic_number = db.Column(db.String(9), nullable = False)
+    hnumber = db.Column(db.String(9), nullable = False)
+    bdate = db.Column(db.DateTime)
+    fname = db.Column(db.String(20), nullable = False)
+    lname = db.Column(db.String(20), nullable = False)
+    phone_number = db.Column(db.String(11))
+    full_name = column_property(fname + " " + lname)
+
+    def _init_(self, doctor_id, clinic_number, hnumber,fname,lname,phone_number):
+        self.doctor_id = doctor_id
+        self.clinic_number = clinic_number
+        self.hnumber = hnumber
+        self.fname = fname
+        self.lname = lname
+        self.phone_number = phone_number
+
 
 class Patient(db.Model):
     _tablename_ = 'patient'
@@ -49,24 +75,6 @@ class HospitalClinic(db.Model):
     hnumber = db.Column(db.String(9), primary_key=True)
     clinic_number = db.Column(db.String(9), nullable=False)
 
-class Doctor(db.Model):
-    _tablename_ ='doctor'
-    doctor_id = db.Column(db.String(9), primary_key = True)
-    clinic_number = db.Column(db.String(9), nullable = False)
-    hnumber = db.Column(db.String(9), nullable = False)
-    bdate = db.Column(db.DateTime)
-    fname = db.Column(db.String(20), nullable = False)
-    lname = db.Column(db.String(20), nullable = False)
-    phone_number = db.Column(db.String(11))
-    full_name = column_property(fname + " " + lname)
-
-    def _init_(self, doctor_id, clinic_number, hnumber,fname,lname,phone_number):
-        self.doctor_id = doctor_id
-        self.clinic_number = clinic_number
-        self.hnumber = hnumber
-        self.fname = fname
-        self.lname = lname
-        self.phone_number = phone_number
 
 
 def the_hospital_factory():
@@ -115,7 +123,7 @@ def index():
 
 
 @app.route('/appointment',methods=['POST','GET'])
-def appointment():
+def system():
     session['doctors'] = []
     session['clinics'] = []
     hospital_form = selectHospitalForm()
@@ -158,7 +166,31 @@ def get_doctors(hospital,clinic):
 
     return jsonify({'doctors':doctor_array})      
 
-  
+@app.route("/range/<doctor>",methods=["POST","GET"])
+def range(doctor): 
+    if request.method == 'POST':
+        From = request.form['From']
+        dt = datetime.strptime(From, "%Y-%m-%d").date()
+
+        booked_app = Appointment.query.filter_by(app_date = dt).all()
+
+
+
+        app_time_list = app_create(doctor)
+        app_list = []
+        for i in app_time_list:
+            new_app = Appointment (doctor, "11111118",i)
+            app_list.append(new_app)
+
+        for i in app_list:
+            for j in booked_app:
+                if i.app_time == j.app_time.strftime("%H:%M"):
+                    app_list.remove(i)    
+                    print("deleted!")    
+            
+
+    
+    return jsonify({'htmlresponse': render_template('available_time_response.html', ordersrange=app_list)})  
 
 @app.route('/hospital',methods=['POST','GET'])
 def hospital():
@@ -170,7 +202,7 @@ def hospital():
 
 @app.route('/get-clinics', methods=['GET', 'POST'])
 def get_clinics():
-    print("HI!")
+
     selected_hospital= request.get_json(silent=False)
     selected_clinics = Clinic.query.all()
     session['clinics'] = [item.clinic_number for item in selected_clinics]
@@ -226,8 +258,28 @@ def personadd():
     return render_template("add_doctor.html")
 
 
+def datetime_range(start, end, delta):
+    current = start
+    while current < end:
+        yield current
+        current += delta
+
+def app_create(doctor_id):
+    app_start_time =  datetime(2016, 9, 1, 8)
+    app_end_time = datetime(2016, 9, 1, 5+12)
+    dts = [dt.strftime('%H:%M') for dt in datetime_range(app_start_time,app_end_time , timedelta(minutes=15))]
+
+    lunch_start_time =  datetime(2016, 9, 1, 12)
+    lunch_end_time = datetime(2016, 9, 1, 1+12)
+    lunch_break = [dt.strftime('%H:%M') for dt in datetime_range(lunch_start_time,lunch_end_time , timedelta(minutes=15))]
+    for i in lunch_break:
+        dts.remove(i) 
+    
+    return dts   
+#(self, doc_id, pat_ssn, app_date,app_time,app_desc)
+
 if(__name__== "__main__"):
     # db.create_all()
-    csrf.init_app(app)
+    # csrf.init_app(app)
     app.run(debug=True)    
     
