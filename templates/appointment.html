@@ -11,7 +11,8 @@
     <form name = 'appointment_form'  method="post" >
         {{ hospital_form.csrf_token() }} 
         {{ hospital_form.all_hospitals }} <br>
-        {{ clinic_form.clinics }}
+        {{ clinic_form.clinics }}         <br>
+        {{ doctor_form.doctors }}
     </form>    
     
 </body>
@@ -19,8 +20,35 @@
 <script>
     let hospital_select = document.getElementById('all_hospitals') 
     let clinic_select = document.getElementById('clinics')
+    let doctor_select = document.getElementById('doctors')
     
     hospital_select.onchange = function(){
+        update_clinic();
+    }
+
+    clinic_select.onchange = function(){
+        update_doctor();
+    }
+
+
+    
+
+    function update_doctor(){
+        hospital = hospital_select.value
+        clinic = clinic_select.value;
+
+        fetch('/appointment/'+hospital+'/'+clinic).then(function(response){
+            response.json().then(function(data){
+                let optionHTML = '';
+                for(let doctor of data.doctors){
+                    optionHTML +='<option value="'+ doctor.doctor_id + '">' + doctor.full_name+ '</option>';
+                }
+                doctor_select.innerHTML = optionHTML
+            });
+        });
+    }
+
+    function update_clinic(){
         hospital = hospital_select.value;
 
         fetch('/appointment/'+hospital).then(function(response){

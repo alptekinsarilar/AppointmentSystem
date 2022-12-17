@@ -1,5 +1,6 @@
 from flask import Flask, render_template, jsonify, request, session
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import column_property
 from datetime import datetime
 from flask_wtf import FlaskForm, CSRFProtect
 from wtforms.fields import SubmitField
@@ -57,6 +58,7 @@ class Doctor(db.Model):
     fname = db.Column(db.String(20), nullable = False)
     lname = db.Column(db.String(20), nullable = False)
     phone_number = db.Column(db.String(11))
+    full_name = column_property(fname + " " + lname)
 
     def _init_(self, doctor_id, clinic_number, hnumber,fname,lname,phone_number):
         self.doctor_id = doctor_id
@@ -73,6 +75,9 @@ def the_hospital_factory():
 def the_clinic_factory():
      return [Clinic.query.get(item) for item in session['clinics']]
 
+def the_doctor_factory():
+     return [Doctor.query.get(item) for item in session['doctors']]
+
 
 class selectHospitalForm(FlaskForm):
     all_hospitals =  QuerySelectField(query_factory=the_hospital_factory, get_label='hname')# render_kw={"onclick": "clinicFunction();"}
@@ -82,6 +87,9 @@ class SelectClinicForm(FlaskForm):
     clinics = QuerySelectField(query_factory=the_clinic_factory, get_label='clinic_name')
     submit = SubmitField()
 
+class SelectDoctorForm(FlaskForm):
+    doctors = QuerySelectField(query_factory=the_doctor_factory, get_label='clinic_name')
+    submit = SubmitField()
 
 @app.route('/', methods = ['POST','GET'])
 def index():
@@ -108,12 +116,15 @@ def index():
 
 @app.route('/appointment',methods=['POST','GET'])
 def appointment():
+    session['doctors'] = []
+    session['clinics'] = []
     hospital_form = selectHospitalForm()
     clinic_form = SelectClinicForm()
+    doctor_form = SelectDoctorForm()
 
 
 
-    return render_template('appointment.html',hospital_form =hospital_form, clinic_form = clinic_form)
+    return render_template('appointment.html',hospital_form =hospital_form, clinic_form = clinic_form, doctor_form = doctor_form)
 
 @app.route("/appointment/<hospital>")
 def get_hospital(hospital):
@@ -133,6 +144,19 @@ def get_hospital(hospital):
         clinic_array.append(cliObj)
 
     return jsonify({'clinics':clinic_array})   
+
+@app.route("/appointment/<hospital>/<clinic>")
+def get_doctors(hospital,clinic):
+    doctors = Doctor.query.filter_by(hnumber = hospital,clinic_number = clinic)
+    doctor_array = []
+
+    for doctor in doctors:
+        docObj = {}
+        docObj["doctor_id"]  = doctor.doctor_id
+        docObj["full_name"]  = doctor.full_name
+        doctor_array.append(docObj)
+
+    return jsonify({'doctors':doctor_array})      
 
   
 
