@@ -1,0 +1,14 @@
+{% for row in ordersrange %}
+ </p>
+    {% if row.result == 'success' %}
+    <p id="thank-you-message" class = "btn-success">
+        {{row.message}}
+     </p>
+    {% else %}
+        <p id="error-message" class="btn-danger" >
+            {{row.message}}
+        </p>
+    {% endif %}
+{% endfor %} 
+
+
