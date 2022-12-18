@@ -196,7 +196,6 @@ def range(doctor,ssn,desc):
         to_be_deleted = []
         for i in app_list:
             for j in booked_app:
-                print(f'{i.app_time}, {j.app_time}')
                 if i.app_time == j.app_time:
                     to_be_deleted.append(i)    
                     print("deleted!")    
@@ -211,12 +210,6 @@ def range(doctor,ssn,desc):
 def submit_appointment(doctor,ssn,date,time,desc): 
     time =  datetime.strptime(time, '%H:%M:%S').time()
     date = datetime.strptime(date, "%Y-%m-%d").date()
-    print(doctor)
-    print(ssn)
-    print(time)
-    
-    print(date)
-    print(desc)
 
     new_app = Appointment (doctor,ssn,time,date,desc)
     try:
@@ -229,8 +222,7 @@ def submit_appointment(doctor,ssn,date,time,desc):
 @app.route("/del_appointment/<doctor>/<ssn>/<day>/<month>/<year>/<time>",methods=["POST","GET"])
 def del_appointment(doctor,ssn,day,month,year,time): 
     # time =  datetime.strptime(time, '%H:%M:%S').time()
-    print(doctor)
-    print(ssn)
+
     doctor = doctor.strip()
     day = day.strip()
     month = month.strip()
@@ -238,26 +230,21 @@ def del_appointment(doctor,ssn,day,month,year,time):
     time = time.strip()
     date = x = datetime(int(year), int(month), int(day))
     time = datetime.strptime(time, '%H:%M:%S').time()
-    print(day)
-    print(month)
-    print(year)
-    
-    print(time)
 
 
-    # try:
-    doc = Doctor.query.filter_by(full_name = doctor).first()
-    print(doc.fname)
-    app = Appointment.query.filter_by(doc_id = doc.doctor_id,
-                                        app_time = time,
-                                        app_date = date,
-                                        pat_ssn = ssn
-                                        ).delete()
-    db.session.commit()
-    print(app)                                    
-    return jsonify({'result':'success'})   
-    # except:
-    #     return jsonify({'result':'fail'})  
+    try:
+        doc = Doctor.query.filter_by(full_name = doctor).first()
+
+        app = Appointment.query.filter_by(doc_id = doc.doctor_id,
+                                            app_time = time,
+                                            app_date = date,
+                                            pat_ssn = ssn
+                                            ).delete()
+        db.session.commit()
+        print(app)                                    
+        return jsonify({'result':'success'})   
+    except:
+        return jsonify({'result':'fail'})  
 
 @app.route('/delete',methods=['POST','GET'])
 def get_apps():
@@ -270,7 +257,6 @@ def delete(ssn):
         ).join(Doctor,Doctor.doctor_id==Appointment.doc_id 
         ).join(Hospital, Hospital.hnumber==Doctor.hnumber
         ).all()
-    print(joined_table)
     rows = []
     for row in joined_table:
         app = row[0]
@@ -311,7 +297,6 @@ def doctors():
         doc_text = '<ul>'
         for doctor in doctors:
             sock_text += '<li>' + sock.fname + ', ' + sock.lname +',' + '</li>'
-            print(doctor.fname)
         sock_text += '</ul>'
         return sock_text
     except Exception as e:

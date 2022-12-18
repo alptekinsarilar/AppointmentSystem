@@ -11,11 +11,11 @@ body{
     justify-content: center;
   }
 
-#thank-you-message {
+#success-message {
     display: none;
 }
   
-#thank-you-message.show {
+#success-message.show {
     display: block;
 }
 
@@ -23,7 +23,7 @@ body{
     display: none;
 }
   
-#thank-you-message.show {
+#success-message.show {
     display: block;
 }  
 

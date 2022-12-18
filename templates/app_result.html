@@ -2,7 +2,7 @@
 
 <p id="thank-you-message" class = "btn-success">
    Appointment deleted successfully
-  </p>
+</p>
 <p id="error-message" class="btn-danger" >
     Appointment couldn't deleted
 </p>
@@ -18,11 +18,11 @@
     </tr>
     {% for row in ordersrange %}
         <tr>
-        <td class = "hospital">{{row.hospital}}</td>
-        <td class = "doctor">  {{row.doctor}}</td>
-        <td class = "date">    {{row.app_date}}</td>
-        <td class = "time">    {{row.app_time}}</td>
-        <td><input class = "row-button  btn-danger" type="button" id = "row_select", value = "delete"></td>
+            <td class = "hospital">{{row.hospital}}</td>
+            <td class = "doctor">  {{row.doctor}}</td>
+            <td class = "date">    {{row.app_date}}</td>
+            <td class = "time">    {{row.app_time}}</td>
+            <td><input class = "row-button  btn-danger" type="button" id = "row_select", value = "delete"></td>
         </tr>
     {% endfor %}
 </table>
