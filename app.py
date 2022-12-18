@@ -61,6 +61,15 @@ class Patient(db.Model):
     fname = db.Column(db.String(20), nullable=False)
     lname = db.Column(db.String(20), nullable=False)
 
+    def __init__(self,ssn,bdate,blood_type,sex,fname,lname):
+        self.ssn = ssn
+        self.bdate = bdate
+        self.blood_type =blood_type
+        self.sex = sex
+        self.fname = fname
+        self.lname = lname
+
+
 class Hospital(db.Model):
     _tablename_ = 'hospital'
     hnumber = db.Column(db.String(9), primary_key=True)
@@ -113,24 +122,6 @@ class SelectAppointmentForm(FlaskForm):
 @app.route('/', methods = ['POST','GET'])
 def index():
     return render_template('show.html', hospital_form=selectHospitalForm())
-    # hnumber = ''
-    # clinic_num = ''
-    # doc_num= ''
-
-    # if request.method == "POST": 
-    #     print("HI")
-
-    # try:
-    #     Hospitals = Hospital.query.order_by(Hospital.hname).all()
-    #     hnames = []
-    #     for h in Hospitals:
-    #         hnames.append(h.hname)
-    #     return render_template('index.html',hnames = hnames)
-    # except Exception as e:
-    #     # e holds description of the error
-    #     error_text = "<p>The error:<br>" + str(e) + "</p>"
-    #     hed = '<h1>Something is broken.</h1>'
-    #     return hed + error_text
 
 
 @app.route('/appointment',methods=['POST','GET'])
@@ -322,19 +313,32 @@ def create_file():
         return render_template('add_doctor.html')
 
 
-@app.route("/personadd", methods=['POST'])
-def personadd():
-    doctor_id = request.form["doctor_id"]
-    clinic_number = request.form["clinic_number"]
-    hnumber = request.form["hnumber"]
-    fname = request.form["fname"]
-    lname = request.form["lname"]
-    phone_number = request.form["phone_number"]
-    entry = Doctor( doctor_id, clinic_number, hnumber,fname,lname,phone_number)
-    db.session.add(entry)
-    db.session.commit()
+@app.route("/personadd/<ssn>/<From>/<sex>/<fname>/<lname>/<btype>", methods=['POST'])
+def personadd(ssn,From,sex,fname,lname,btype):
+    app_list = []
 
-    return render_template("add_doctor.html")
+    dt = datetime.strptime(From, "%Y-%m-%d").date()
+   
+
+
+    try:
+        pat = Patient(ssn,dt,btype,sex,fname,lname )
+        db.session.add(pat)
+        db.session.commit()
+        result = 'success'
+        msg = 'Added Succesfully'
+    except:   
+        result = 'fail'
+        msg = 'User already exist' 
+
+    result = 'success'
+    msg = 'Added Succesfully'
+
+    msgObj = {}
+    msgObj['message'] = msg
+    msgObj['result'] = result
+    app_list.append(msgObj)
+    return jsonify({'htmlresponse': render_template('message.html', ordersrange=app_list)})   
 
 
 def datetime_range(start, end, delta):
