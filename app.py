@@ -8,7 +8,7 @@ from wtforms_sqlalchemy.fields import QuerySelectField
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:5746@localhost/PROJE_DENEME6'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost/PROJE_DENEME6'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = 'secret string'
 
