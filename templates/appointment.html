@@ -22,7 +22,7 @@
 
     <div class="row">
         <div>
-            <input type="text" name="ssn" id="ssn" maxlength="9" minlength="9" class="form-control" placeholder="ssn" required/>
+            <input type="text" name="ssn" id="ssn" maxlength="8" minlength="8" class="form-control" placeholder="ssn" required />
         </div>
         <div>
             <input type="text" name="desc" id="desc" minlength="1" class="form-control" placeholder="desc" required/>
@@ -61,37 +61,37 @@
 <script>
 
     $(document).ready(function(){
-    $.datepicker.setDefaults({
-        dateFormat: 'yy-mm-dd'
+        $.datepicker.setDefaults({
+            dateFormat: 'yy-mm-dd'
+        });
+        $(function(){
+            $("#From").datepicker();
+        });
+        $('#range').click(function(){
+            var From = $('#From').val();
+            var doctor = document.getElementById('doctors').value
+            var ssn = document.getElementById('ssn').value
+            var desc = document.getElementById('desc').value
+            if(From != '' && doctor !='' && ssn !='' && desc !='')
+            {
+                let url = '/range/'+doctor+'/'+ssn+'/'+desc
+                $.ajax({
+                    url:url,
+                    method:"POST",
+                    data:{From:From},
+                    success:function(data)
+                    {
+                        $('#available_appointments').html(data);
+                        $('#available_appointments').append(data.htmlresponse);
+                    }
+                });
+            }
+            else
+            {
+                alert("Please be sure all the fields are filled");
+            }
+        });
     });
-    $(function(){
-        $("#From").datepicker();
-    });
-    $('#range').click(function(){
-        var From = $('#From').val();
-        var doctor = document.getElementById('doctors').value
-        var ssn = document.getElementById('ssn').value
-        var desc = document.getElementById('desc').value
-        if(From != '' && doctor !='' && ssn !='' && desc !='')
-        {
-            let url = '/range/'+doctor+'/'+ssn+'/'+desc
-            $.ajax({
-                url:url,
-                method:"POST",
-                data:{From:From},
-                success:function(data)
-                {
-                    $('#available_appointments').html(data);
-                    $('#available_appointments').append(data.htmlresponse);
-                }
-            });
-        }
-        else
-        {
-            alert("Please be sure all the fields are filled");
-        }
-    });
-});
 </script>
 
 <script>

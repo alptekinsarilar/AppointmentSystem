@@ -83,10 +83,14 @@ def the_hospital_factory():
     return Hospital.query
 
 def the_clinic_factory():
-     return [Clinic.query.get(item) for item in session['clinics']]
+    return [Clinic.query.get(item) for item in session['clinics']]
 
 def the_doctor_factory():
-     return [Doctor.query.get(item) for item in session['doctors']]
+    return [Doctor.query.get(item) for item in session['doctors']]
+
+
+def the_appointment_factory():
+    return [Appointment.query.get(item) for item in session['appointments']]     
 
 
 class selectHospitalForm(FlaskForm):
@@ -98,8 +102,13 @@ class SelectClinicForm(FlaskForm):
     submit = SubmitField()
 
 class SelectDoctorForm(FlaskForm):
-    doctors = QuerySelectField(query_factory=the_doctor_factory, get_label='clinic_name')
+    doctors = QuerySelectField(query_factory=the_doctor_factory, get_label='full_name')
     submit = SubmitField()
+
+class SelectAppointmentForm(FlaskForm):
+    appointments = QuerySelectField(query_factory=the_appointment_factory, get_label='app_date')
+    submit = SubmitField()
+
 
 @app.route('/', methods = ['POST','GET'])
 def index():
@@ -143,7 +152,6 @@ def get_hospital(hospital):
         ).join(HospitalClinic,HospitalClinic.hnumber==Hospital.hnumber 
         ).join(Clinic, Clinic.clinic_number==HospitalClinic.clinic_number
         ).all()    
-    print(joined_table)
     clinic_array = []
 
     for all in joined_table:
@@ -172,8 +180,6 @@ def get_doctors(hospital,clinic):
 def range(doctor,ssn,desc): 
     if request.method == 'POST':
         From = request.form['From']
-        print(ssn)
-        print(desc)
         dt = datetime.strptime(From, "%Y-%m-%d").date()
 
         booked_app = Appointment.query.filter_by(app_date = dt).all()
@@ -218,10 +224,67 @@ def submit_appointment(doctor,ssn,date,time,desc):
         db.session.commit()
         return jsonify({'result':'success'})   
     except:
-        return jsonify({'result':'fail'})       
+        return jsonify({'result':'fail'})  
 
+@app.route("/del_appointment/<doctor>/<ssn>/<day>/<month>/<year>/<time>",methods=["POST","GET"])
+def del_appointment(doctor,ssn,day,month,year,time): 
+    # time =  datetime.strptime(time, '%H:%M:%S').time()
+    print(doctor)
+    print(ssn)
+    doctor = doctor.strip()
+    day = day.strip()
+    month = month.strip()
+    year = year.strip()
+    time = time.strip()
+    date = x = datetime(int(year), int(month), int(day))
+    time = datetime.strptime(time, '%H:%M:%S').time()
+    print(day)
+    print(month)
+    print(year)
+    
+    print(time)
+
+
+    # try:
+    doc = Doctor.query.filter_by(full_name = doctor).first()
+    print(doc.fname)
+    app = Appointment.query.filter_by(doc_id = doc.doctor_id,
+                                        app_time = time,
+                                        app_date = date,
+                                        pat_ssn = ssn
+                                        ).delete()
+    db.session.commit()
+    print(app)                                    
+    return jsonify({'result':'success'})   
+    # except:
+    #     return jsonify({'result':'fail'})  
+
+@app.route('/delete',methods=['POST','GET'])
+def get_apps():
+    return render_template('delete.html')
    
+@app.route('/delete/<ssn>',methods=['POST','GET'])
+def delete(ssn):
+    joined_table = db.session.query(Appointment, Hospital, Doctor
+        ).filter(Appointment.pat_ssn==ssn
+        ).join(Doctor,Doctor.doctor_id==Appointment.doc_id 
+        ).join(Hospital, Hospital.hnumber==Doctor.hnumber
+        ).all()
+    print(joined_table)
+    rows = []
+    for row in joined_table:
+        app = row[0]
+        hos = row[1]
+        doc = row[2]
+        obj = {}
+        obj['hospital'] = hos.hname
+        obj['doctor'] = doc.full_name
+        obj['app_date'] = app.app_date.strftime("%d/%m/%Y")
+        obj['app_time'] = app.app_time.strftime("%H:%M:%S")
+        obj['doc_id'] = doc.doctor_id
+        rows.append(obj)
 
+    return jsonify({'htmlresponse': render_template('app_result.html', ordersrange=rows)})   
 
 @app.route('/hospital',methods=['POST','GET'])
 def hospital():

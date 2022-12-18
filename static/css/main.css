@@ -29,5 +29,9 @@ body{
 
 input:valid,
 textarea:valid {
-    background-color: palegreen;
-}  
+    background-color:rgb(211, 240, 211);
+}
+input:invalid,
+textarea:invalid {
+    background-color:lightgoldenrodyellow;
+}    
