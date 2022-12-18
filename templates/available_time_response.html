@@ -6,21 +6,23 @@
 <p id="error-message" class="btn-danger" >
     Unsuccessfull 
 </p>
-
-<table class="table table-bordered">
-    <tr>
-
-    <th width="50%">Appointment Date</th>
-    <th width="50%">Appointment Time</th>
-    </tr>
-    {% for row in ordersrange %}
+<div style="width:1000px; margin-left:auto;margin-right:auto; margin-bottom: 10px; background-color: azure; height: 276px; overflow: scroll;">
+    <table class="table table-bordered">
         <tr>
-        <td>{{row.app_date}}</td>
-        <td class="app_time">{{row.app_time}}</td>
-        <td><input class = "row-button" type="button" id = "row_select", value = "Take"></td>
+    
+        <th width="50%">Appointment Date</th>
+        <th width="50%">Appointment Time</th>
         </tr>
-    {% endfor %}
-</table>
+        {% for row in ordersrange %}
+            <tr>
+            <td>{{row.app_date}}</td>
+            <td class="app_time">{{row.app_time}}</td>
+            <td><input class = "row-button" type="button" id = "row_select", value = "Al"></td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+
 
 <script>
     var doctor = document.getElementById('doctors').value

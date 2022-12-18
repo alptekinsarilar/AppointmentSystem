@@ -3,6 +3,14 @@ body{
     font-family: sans-serif;
 }
 
+.appointment-form{
+    max-width:500px;
+    margin:2rem auto;
+    border:2px solid #E74C3C;
+    padding:2rem;
+    border-radius:5px;
+}
+
 .foo {
     position: static;
     left:0%;

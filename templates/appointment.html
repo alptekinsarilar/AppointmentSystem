@@ -7,11 +7,11 @@
     <title>Document</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css"/>
-    <link rel="stylesheet" href="../static/css/main.css">
+    <link rel="stylesheet" href="../static/css/alptekin.css">
 </head>
 <body>
-
-    <form name = 'appointment_form'  method="post">
+    <label id="form_label" for="form" >Hastane, Poliklinik ve Doktor Seçiniz.</label>
+    <form name = 'appointment_form' id="form" class="appointment-form" method="post">
         {{ hospital_form.csrf_token() }} 
         {{ hospital_form.all_hospitals }} <br>
         {{ clinic_form.clinics }}         <br>
@@ -20,32 +20,31 @@
 
     
 
-    <div class="row">
+    <div class="rows">
         <div class="col-md-2">
-            <input type="text" name="ssn" id="ssn" maxlength="8" minlength="8" class="form-control" placeholder="ssn" required />
-        </div>
-        <div class="col-md-2">
-            <input type="text" name="desc" id="desc" minlength="1" class="form-control" placeholder="desc" required/>
+            <label for="ssn">Hasta TC</label>
+            <input type="text" name="ssn" id="ssn" maxlength="8" minlength="8" class="form-control" placeholder="Örn: 11111111" required />
         </div>
         <div class="col-md-2">
-            <input type="text" name="From" id="From" class="form-control" placeholder="Date" required/>
+            <label for="desc">Açıklama</label>
+            <input type="text" name="desc" id="desc" class="form-control" placeholder="Hastalık Belirtileri"/>
         </div>
-        <div class="col-md-4">
-            <input type="button" name="range" id="range" value="Search" class="btn btn-success"/>
+        <div class="col-md-2">
+            <label for="From">Randevu Tarihi</label>
+            <input type="text" name="From" id="From" class="form-control" placeholder="Tarih" required/>
         </div>
-        <div class="clearfix"></div>
-        <br/>
+        <div class="col-md-2">
+            <input type="button" name="range" id="range" value="Randevu Ara" class="btn btn-success"/>
         </div>
-        <div id="available_appointments">
-            <table class="table table-bordered">
-                <tr>
-                <th width="5%">Appointment Date</th>
-                <th width="35%">Appointment Time</th>
+    </div>
+    <div id="available_appointments">
+        <table class="table table-bordered">
+            <tr>
+            <th width="5%">Appointment Date</th>
+            <th width="35%">Appointment Time</th>
 
-            </table>
-            
-        
-        </div>
+        </table>
+    </div>
     
 </body>
 
